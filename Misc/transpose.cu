@@ -15,14 +15,15 @@ void check(T err, const char* const func, const char* const file, const int line
   }
 }
 
-int compare_matrices(float *gpu, float *ref, const int N){
+bool compare_matrices(float *gpu, float *ref, const int N){
   for(int j = 0; j < N; j++){
     for(int i = 0; i < N; i++){
-        if(ref[i + j*N] - gpu[i + j*N] > 0.000001);
-          return 1;
+        if(abs(ref[i + j*N] - gpu[i + j*N]) > 0.0001){
+            return true;
+        }
     }
   }
-  return 0;
+  return false;
 }
 
 void print_matrix(float *mat, const int N) {	
@@ -153,7 +154,7 @@ int main(int argc, char **argv){
   //init data and get the gold
   fill_matrix(in, N);
   transpose_CPU(in, gold, N);
-
+  
   //MALLOC device memory  
   float *d_in, *d_out;
   cudaMalloc(&d_in, numbytes);
@@ -167,7 +168,7 @@ int main(int argc, char **argv){
   timer.Stop();
   cudaMemcpy(out, d_out, numbytes, cudaMemcpyDeviceToHost);
   printf("transpose_serial: %g ms.\nVerifying transpose...%s\n", timer.Elapsed(), compare_matrices(out, gold, N) ? "Failed" : "Success");
-
+  
   timer.Start();
   transpose_parallel_per_row<<<1,N>>>(d_in, d_out, N);
   timer.Stop();
