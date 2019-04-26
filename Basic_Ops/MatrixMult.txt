@@ -1,4 +1,0 @@
-./MatrixMult Starting...
-GPU_global_MMKernel <<<(32,32), (16,16)>>> elapsed 2.368212 ms
-GPU_shmem_MMKernel <<<(32,32), (16,16)>>> elapsed 1.378059 ms
-CPU_MMKernel elapsed 1053.816080 ms
