@@ -91,7 +91,7 @@ int main(){
 //  waitKey();
   
   //存储
-  cv::imwrite("hill_merge.jpg",dstImg);
+  cv::imwrite("lena_merge_moon.jpg",dstImg);
     
   //unbind and free memory
   cudaUnbindTexture(refTex1);
