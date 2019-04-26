@@ -9,8 +9,8 @@ using namespace std;
 using namespace cv;
 
 //声明CUDA纹理:texture<type,dimension,readtype> texreference;
-texture <uchar4,cudaTextureType2D,cudaReadModeNormaliedFloat> refTex1;
-texture <uchar4,cudaTextureType2D,cudaReadModeNormaliedFloat> refTex2;
+texture <uchar4,cudaTextureType2D,cudaReadModeNormalizedFloat> refTex1;
+texture <uchar4,cudaTextureType2D,cudaReadModeNormalizedFloat> refTex2;
 
 ////声明CUDA数组
 cudaArray* cuArray1;
@@ -49,17 +49,53 @@ int main(){
   int imgHeight = lena.rows;
   int channels = lena.channels();
 
-  //设置纹理属性
+  //设置refTex1纹理属性
   cudaError_t t;
   refTex1.addressMode[0] = cudaAddressModeClamp;
   refTex1.addressMode[1] = cudaAddressModeClamp;
-  refTex1.normallized = false;
+  refTex1.normalized = false;
   refTex1.filterMode = cudaFilterModeLinear;
-  //绑定cuArray到纹理
+  //绑定cuArray到纹理refTex1
   cudaMallocArray(&cuArray1,&cuDesc,imgWidth,imgHeight);
-  t = cudaBindTextureToArray(refTex1,cudaArray1);
- 
+  t = cudaBindTextureToArray(refTex1,cuArray1);
+  //设置refTex2纹理属性
   refTex2.addressMode[0] = cudaAddressModeClamp;
   refTex2.addressMode[1] = cudaAddressModeClamp;
+  refTex2.normalized = false;
+  refTex2.filterMode = cudaFilterModeLinear;
+  //绑定cuArray到纹理refTex2
+  cudaMallocArray(&cuArray2, &cuDesc, imgWidth, imgHeight);
+  t = cudaBindTextureToArray(refTex2,cuArray2);
+  
+  //拷贝数据到cudaArray
+  t = cudaMemcpyToArray(cuArray1,0,0,lena.data,imgWidth*imgHeight*sizeof(uchar)*channels, cudaMemcpyHostToDevice);
+  t = cudaMemcpyToArray(cuArray2,0,0,moon.data,imgWidth*imgHeight*sizeof(uchar)*channels, cudaMemcpyHostToDevice);
+  
+  //输出图像
+  Mat dstImg = Mat::zeros(imgHeight, imgWidth, CV_8UC4);
+  uchar *pDstImgDate = NULL;
+  t = cudaMalloc((uchar **)&pDstImgData, imgHeight*imgWidth*sizeof(uchar)*channels);
 
+  //invoke the kernel
+  dim3 block(16,16);
+  dim3 grid((imgWidth+block.x-1)/block.x, (imgHeight+block.y-1)/block.y);
+  weightAddKerkel<<<grid, block, 0>>>(pDstImgData, imgHeight, imgWidth, channels);
+  cudaThreadSynchronize();
+
+  //从GPU拷贝输出到CPU
+  t=cudaMemcpy(dstImg.data, pDstImgData, imgWidth*imgHeight*sizeof(uchar)*channels, cudaMemcpyDeviceToHost);
+
+  //显示
+  namedWindow("show");
+  imshow("show",dstImg);
+  waitKey();
+  
+  //存储
+  cv::imwrite("merge_pic.jpg",dstImg);
+    
+  //unbind and free memory
+  cudaUnbindTexture(refTex1);
+  cudaUnbindTexture(refTex2);
+  cudaFreeArray(cuArray1);
+  cudaFreeArray(cuArray2);
 }
