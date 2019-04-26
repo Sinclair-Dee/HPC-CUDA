@@ -3,7 +3,6 @@
 #include <string>
 #include <cuda.h>
 #include <cuda_runtime.h>
-#include <cuda_runtime_api.h>
 #include <device_launch_parameters.h>
 
 using namespace std;
@@ -23,7 +22,7 @@ cudaChannelFormatDesc cuDesc = cudaCreateChannelDesc<uchar4>();
 __global__ 
 void weightAddKernel(uchar *pDstImgData, int imgHeight, int imgWidth,int channels){
   const int tidx = blockDim.x * blockIdx.x + threadIdx.x;
-  const int tidy = blockDim.y * blockIdx.x + threadIdx.y;
+  const int tidy = blockDim.y * blockIdx.y + threadIdx.y;
 
   if(tidx<imgWidth && tidy<imgHeight){
     float4 lenaBGR, moonBGR;
