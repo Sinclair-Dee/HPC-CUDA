@@ -1,5 +1,5 @@
-# gcp
-Google Cloud Platform
+#gcp
+Google Cloud Platform(P100 & T4)
 
 ### install drivers
 sudo add-apt-repository ppa:graphics-drivers/ppa  
