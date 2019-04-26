@@ -3,6 +3,7 @@
 #include <string>
 #include <cuda.h>
 #include <cuda_runtime.h>
+#include <cuda_runtime_api.h>
 #include <device_launch_parameters.h>
 
 using namespace std;
@@ -73,22 +74,22 @@ int main(){
   
   //输出图像
   Mat dstImg = Mat::zeros(imgHeight, imgWidth, CV_8UC4);
-  uchar *pDstImgDate = NULL;
+  uchar *pDstImgData = NULL;
   t = cudaMalloc((uchar **)&pDstImgData, imgHeight*imgWidth*sizeof(uchar)*channels);
 
   //invoke the kernel
   dim3 block(16,16);
   dim3 grid((imgWidth+block.x-1)/block.x, (imgHeight+block.y-1)/block.y);
-  weightAddKerkel<<<grid, block, 0>>>(pDstImgData, imgHeight, imgWidth, channels);
-  cudaThreadSynchronize();
+  weightAddKernel<<<grid, block, 0>>>(pDstImgData, imgHeight, imgWidth, channels);
+  t = cudaThreadSynchronize();
 
   //从GPU拷贝输出到CPU
   t=cudaMemcpy(dstImg.data, pDstImgData, imgWidth*imgHeight*sizeof(uchar)*channels, cudaMemcpyDeviceToHost);
 
   //显示
-  namedWindow("show");
-  imshow("show",dstImg);
-  waitKey();
+//  namedWindow("show");
+//  imshow("show",dstImg);
+//  waitKey();
   
   //存储
   cv::imwrite("merge_pic.jpg",dstImg);
@@ -98,4 +99,6 @@ int main(){
   cudaUnbindTexture(refTex2);
   cudaFreeArray(cuArray1);
   cudaFreeArray(cuArray2);
+
+  return 0;
 }
