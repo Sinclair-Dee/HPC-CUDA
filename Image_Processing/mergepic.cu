@@ -91,7 +91,7 @@ int main(){
 //  waitKey();
   
   //存储
-  cv::imwrite("merge_pic.jpg",dstImg);
+  cv::imwrite("hill_merge.jpg",dstImg);
     
   //unbind and free memory
   cudaUnbindTexture(refTex1);
