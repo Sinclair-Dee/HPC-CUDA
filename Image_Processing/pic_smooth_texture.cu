@@ -34,5 +34,12 @@ void smooth_kernel(char *img, int width, int height, int channels){
 }
 
 int main(){
-  cv::Mat src = imread("")
+  cv::Mat src = imread("lena.jpg",IMREAD_COLOR);
+  cv::resize(src, src, Size(256, 256));
+  cvtColor(src, src, CV_BGR2BGRA);
+  int rows = src.rows;
+  int cols = src.cols;
+  int channels = src.channels();
+  int width = cols;
+  int 
 }
