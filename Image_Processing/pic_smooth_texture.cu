@@ -37,9 +37,16 @@ int main(){
   cv::Mat src = imread("lena.jpg",IMREAD_COLOR);
   cv::resize(src, src, Size(256, 256));
   cvtColor(src, src, CV_BGR2BGRA);
-  int rows = src.rows;
-  int cols = src.cols;
+  int width = src.rows;
+  int height = src.cols;
   int channels = src.channels();
-  int width = cols;
-  int 
+  int imgsize
+  int width * height * channels;
+
+  //定义cuda数组
+  cudaArray *cudaArray;
+  cudaChannelFormatD
+
+
+
 }
