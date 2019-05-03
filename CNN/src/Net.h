@@ -45,12 +45,65 @@
 #define MNIST_SCALE_FACTOR 0.00390625
 #define MAXBYTE 255
 
+#define gpuErrchk(ans) { gpuAsset((ans),__FILE__, __LINE__);}
+
 void ClearScreen();
 void printMNIST_H_W_row_col_for_Main(device_vector<float> &DATA_, int Height, int Width, int row_start_index, int col_start_index, int row_num, int col_num, int row_interval, int col_interval, char* str);
 namespace GPU_Scope{
+/***** Function declarations ***************************/ 
   
+/***** CLASS declarations ******************************/
+class FullyConnect {
 
-  
 }
 
+class Convolution {
+
+}
+
+class Pool {
+
+}
+
+class Softmax {
+
+}
+
+class Net{
+
+}
+
+class Net_CPU: public Net{
+
+}
+
+class Net_GPU_Naive: public Net{
+
+}
+
+class Net_GPU_Tiled: public Net{
+
+}
+
+class Net_GPU_Gemm: public Net{
+
+}
+
+class Net_GPU_test: public Net{
+
+}
+
+inline void gpuAssert(cudaError_t Err, sonst char *file, int *line,bool abort = true){
+  if(Err != cudaSuccess){
+    fprintf(stderr,"GPUassert:%s %s %d\n",cudaGetErrorString(Err),file,line);
+    if(abort) exit(code);
+  }
+}
+
+
+
+
+
+
+}
 #endif
