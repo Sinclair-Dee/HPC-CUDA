@@ -42,11 +42,11 @@
 #define RAW_PIXELS_PER_IMG 784
 #define RAW_DIM_PADDING 32
 #define RAW_PIXEL_PER_IMG_PADDING 1024
-#define MNISI_SCALE_FACTOR 0.00390625
+#define MNIST_SCALE_FACTOR 0.00390625
 #define MAXBYTE 255
 
 void ClearScreen();
-
+void printMNIST_H_W_row_col_for_Main(device_vector<float> &DATA_, int Height, int Width, int row_start_index, int col_start_index, int row_num, int col_num, int row_interval, int col_interval, char* str);
 namespace GPU_Scope{
   
 
