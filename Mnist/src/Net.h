@@ -11,7 +11,7 @@
 #include <sstream>
 #include <cstdio>
 
-//thrust
+//thrust for CUDA
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include <thrust/generate.h>
@@ -45,10 +45,20 @@
 #define MNIST_SCALE_FACTOR 0.00390625
 #define MAXBYTE 255
 
-#define gpuErrchk(ans) { gpuAsset((ans),__FILE__, __LINE__);}
+#define gpuError(ans) { gpuAssert((ans),__FILE__, __LINE__);}
+inline void gpuAssert(cudaError_t ans, const char *file, int line, bool abort = true){
+  if(ans != cudaSuccess){
+    fprintf(stderr,"GPU_Assert:%s%s%d\n", cudaGetErrorString(ans), file, line);
+    if(abort) exit(ans);
+  }
+}
 
 void ClearScreen();
 void printMNIST_H_W_row_col_for_Main(device_vector<float> &DATA_, int Height, int Width, int row_start_index, int col_start_index, int row_num, int col_num, int row_interval, int col_interval, char* str);
+
+/***** Function declarations *****************************/
+void printMNIST(thrust::host_vector<float>& data)
+/***** Function declarations end *************************/
 namespace GPU_Scope{
 /***** Function declarations ***************************/ 
   
