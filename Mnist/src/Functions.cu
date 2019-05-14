@@ -4,8 +4,19 @@ void clear(){
   usleep(100000);
   for(int i = 0; i < 100; i++) printf("\n")
 }
+
+int reverse_int32(int i){
+  unsigned char byte1,byte2,byte3,byte4;
+  byte1 = i&MAXBYTE;
+  byte2 = (i>>8) &MAXBYTE;
+  byte3 = (i>>16)&MAXBYTE;
+  byte4 = (i>>24)&MAXBYTE;
+  return ((int)byte1<<24) + ((int)byte2<<16) + ((int) byte3<<8) + (int)byte4;
+}
 namespace GPU_Scope{
 
+//read [number of image]×28×28 MNIST data from {datapath}
+//store data into the given float array
 void read_data(const char* datapath, host_vector< host_vector<float> >& data){
   ifstream infile(datapath, ios::binary);
   if(!infile.isopen()){
@@ -18,7 +29,13 @@ void read_data(const char* datapath, host_vector< host_vector<float> >& data){
   int number_of_images = 0;
   int n_rows = 0;
   
-  infile.read((char*)&magic_number)
+  infile.read((char*)&magic_number,sizeof(magic_number));
+  magic = reverse_int32(magic_number);
+  cout<<"magic number: "<<magic_number << endl;
+  
+  infile.read((char*)&number_of_images,sizeof(number_of_images));
+  number_of_images = reverse_int32(number_of_images);
+  cout<<"number of images: "<<number_of_images<<endl;
 }
 
 
