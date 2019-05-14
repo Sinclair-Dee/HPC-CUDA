@@ -72,7 +72,53 @@ class FullyConnect {
 
 }
 
-class Convolution {
+class Convolution {//M*C*H*W
+public:
+  void init(int minib, int X_h, int X_w, int X_ch, int W_w_h, int W_ch);
+   
+  thrust::host_vector<float> host_FM_in;
+  thrust::host_vector<float> host_W
+  thrust::host_vector<float> b_data
+  thrust::host_vector<float> Wgrad_data
+  thrust::host_vector<float> O
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+  thrust::host_vector<float>
+thrust::host_vector
+thrust::host_vector
+
+  
+  int Mini_Batch;
+  int W_width;
+  int W_height;
+  int W_width_height;
+  int W_channel;
+  int Inputimage_height;
+  int Inputimage_channel;
+  int Inputimahe_channel;
+  int FM_in_width;
+  int FM_in__height;
+  int Outputimage_width;
+  int Outputimage_height; 
+  int Outputimage_channel;
+  int FM_out__width;
+  int Fm_out__height;
+  int Unroll_X_width;
+  int Unroll_X_height;
+
+
+  
+
+
+
+
+
 
 }
 
