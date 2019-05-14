@@ -53,14 +53,19 @@ inline void gpuAssert(cudaError_t ans, const char *file, int line, bool abort = 
   }
 }
 
+namespace GPU_Scope{
+
 void ClearScreen();
-void printMNIST_H_W_row_col_for_Main(device_vector<float> &DATA_, int Height, int Width, int row_start_index, int col_start_index, int row_num, int col_num, int row_interval, int col_interval, char* str);
+void printMNIST_H_W_row_col_for_Main(thrust::device_vector<float> &DATA_, int Height, int Width, int row_start_index, int col_start_index, int row_num, int col_num, int row_interval, int col_interval, char* str);
 
 /***** Function declarations *****************************/
-void printMNIST(thrust::host_vector<float>& data)
+void printMNIST(thrust::host_vector<float>& data);
+void read_data(const char* datapath, thrust::host_vector<thrust::host_vector<float> &data>);
+void read_data_no_padding(const char* datapath, thrust::host_vector<thrust::host_vector<float> &data>);
+void read_label(const char* datapath, thrust::host_vector<thrust::host_vector<float> &data>);
+
 /***** Function declarations end *************************/
-namespace GPU_Scope{
-/***** Function declarations ***************************/ 
+
   
 /***** CLASS declarations ******************************/
 class FullyConnect {
