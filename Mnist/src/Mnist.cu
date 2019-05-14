@@ -14,10 +14,16 @@ int main(){
 
   //load data and label.
   GPU_Scope::read_data(PATH_TRAIN_DATA,DataTrain);
-  read_label(PATH_TRAIN_LABEL,LabelTrain);
+  GPU_Scope::read_label(PATH_TRAIN_LABEL,LabelTrain);
   
-  read_data(PATH_TEST_DATA,DataTest);
-  read_data(PATH_TEST_LABEL,LabelTest);
+  GPU_Scope::read_data(PATH_TEST_DATA,DataTest);
+  GPU_Scope::read_data(PATH_TEST_LABEL,LabelTest);
+
+
+
+
+
+
 
 
 }
