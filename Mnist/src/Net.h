@@ -75,25 +75,45 @@ class FullyConnect {
 class Convolution {//M*C*H*W
 public:
   void init(int minib, int X_h, int X_w, int X_ch, int W_w_h, int W_ch);
-   
-  thrust::host_vector<float> host_FM_in;
-  thrust::host_vector<float> host_W
-  thrust::host_vector<float> b_data
-  thrust::host_vector<float> Wgrad_data
-  thrust::host_vector<float> O
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-  thrust::host_vector<float>
-thrust::host_vector
-thrust::host_vector
+  void forward_CPU();
+  void forward_GPU_gemm();  
+  void forward_GPU_naive();
+  void forward_GPU_tiled();
+  void backward_gpu_gemm();
+  void forward_cpu_test(thrust::host_vector &input, int test_number);
+  void forward_gpu_test(thrust::device_vector &input, int test_number);
+  void backward_col2im_gpu_test(int test_number);
+  void backward();
+  void backward_GPU_native();
 
-  
+  void ConvLayerForward(int N, float *FM_in, int C, int H_in, int W_in
+                        float *W, int K, float *Y, int M);
+  void ConvLayerBackwardXgrad(int N, int M, int C, int H_in,int W_in, 
+                              int K, float *dE_dy, float *W, float *dE_dx);
+  void ConvLayerBackwardWgrad(int N, int M, int C, int H_in, int W_in
+                              int K, float *dE_dy, float *FM_in float *dE_dw);
+
+
+  thrust::host_vector<float> host_FM_in;
+  thrust::host_vector<float> host_W;
+  thrust::host_vector<float> host_b_data;
+  thrust::host_vector<float> host_Wgrad_data;
+  thrust::host_vector<float> host_bgrad_data;
+  thrust::host_vector<float> host_FM_out
+
+  thrust::device_vector<float> device_FM_in;
+  thrust::device_vector<float> device_W;
+  thrust::device_vector<float> device_WT;
+  thrust::device_vector<float> device_b_data;
+  thrust::device_vector<float> device_Wgrad_data;
+  thrust::device_vector<float> device_Wgrad_data_Temp;
+  thrust::device_vector<float> device_bgrad_data;
+  thrust::device_vector<float> device_FM_out;
+  thrust::device_vector<float> device_Unroll_FM;
+  thrust::device_vector<float> device_Unroll_FM;
+
+
+
   int Mini_Batch;
   int W_width;
   int W_height;
@@ -111,16 +131,23 @@ thrust::host_vector
   int Fm_out__height;
   int Unroll_X_width;
   int Unroll_X_height;
-
-
-  
-
-
-
-
-
-
+ 
 }
+__global__
+void ConvLayerForwardGPUnaive(float *FM_in, float *W, float *Y, int C, 
+                              int H_in, int W_in, int W_out, int K, int M);
+__global__ 
+void convLayer_forward_GPU_tiled(float* FM_in, float* W, float* Y,
+		int C, int H_in, int W_in, int W_out, int K, int M);
+__global__ 
+void convLayer_backward_GPU_naive(float* FM_in, float* W, float* Y,
+		int C, int H_in, int W_in, int W_out, int K, int M);
+__global__ 
+void unroll_Kernel(int C, int H_in, int W_in, int K, float* FM_in, float* FM_Unroll);
+__global__ 
+void col2im_Kernel(int C, int H_in, int W_in, int K, float* FM_in, float* FM_Unroll);
+
+
 
 class Pool {
 
