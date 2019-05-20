@@ -29,11 +29,11 @@
 #include <string>
 
 //常量定义区
-#define TILE_WIDTH 32
+#define TILE_WIDTH 16
 #define MINIBATCH 1000
 #define LEARNIG_RATE 2e-4
 #define LAMDA (3e-1)
-#define CONV_KERNEL_SIZE 13
+#define CONV_KERNEL_SIZE 5
 #define LABEL_ONE 1
 #define LABEL_ZERO 0
 #define NUM_TRAIN 60000
@@ -86,8 +86,8 @@ public:
   void backward();
   void backward_GPU_native();
 
-  void ConvLayerForward(int N, float *FM_in, int C, int H_in, int W_in
-                        float *W, int K, float *Y, int M);
+  void ConvLayerForward(int BATCH, float *FM_in, int CH_in, int H_in, int W_in
+                        float *W, int W_h_w, float *FM_out, int CH_out);
   void ConvLayerBackwardXgrad(int N, int M, int C, int H_in,int W_in, 
                               int K, float *dE_dy, float *W, float *dE_dx);
   void ConvLayerBackwardWgrad(int N, int M, int C, int H_in, int W_in
@@ -96,25 +96,26 @@ public:
 
   thrust::host_vector<float> host_FM_in;
   thrust::host_vector<float> host_W;
-  thrust::host_vector<float> host_b_data;
-  thrust::host_vector<float> host_Wgrad_data;
-  thrust::host_vector<float> host_bgrad_data;
-  thrust::host_vector<float> host_FM_out
+  thrust::host_vector<float> host_Bias;
+  thrust::host_vector<float> host_Wgrad;
+  thrust::host_vector<float> host_bgrad;
+  thrust::host_vector<float> host_FM_out;
+  thrust::host_vector<float> host_Unroll_FM;
 
   thrust::device_vector<float> device_FM_in;
   thrust::device_vector<float> device_W;
   thrust::device_vector<float> device_WT;
-  thrust::device_vector<float> device_b_data;
-  thrust::device_vector<float> device_Wgrad_data;
-  thrust::device_vector<float> device_Wgrad_data_Temp;
-  thrust::device_vector<float> device_bgrad_data;
+  thrust::device_vector<float> device_Bias;
+  thrust::device_vector<float> device_Wgrad;
+  thrust::device_vector<float> device_Wgrad_Temp;
+  thrust::device_vector<float> device_bgrad;
   thrust::device_vector<float> device_FM_out;
   thrust::device_vector<float> device_Unroll_FM;
-  thrust::device_vector<float> device_Unroll_FM;
+  thrust::device_vector<float> device_Unroll_FMT;
 
 
 
-  int Mini_Batch;
+  int MiniBatch;
   int W_width;
   int W_height;
   int W_width_height;
@@ -123,25 +124,25 @@ public:
   int Inputimage_channel;
   int Inputimahe_channel;
   int FM_in_width;
-  int FM_in__height;
+  int FM_in_height;
   int Outputimage_width;
   int Outputimage_height; 
   int Outputimage_channel;
-  int FM_out__width;
-  int Fm_out__height;
-  int Unroll_X_width;
-  int Unroll_X_height;
+  int FM_out_width;
+  int Fm_out_height;
+  int Unroll_FM_width;
+  int Unroll_FM_height;
  
 }
 __global__
-void ConvLayerForwardGPUnaive(float *FM_in, float *W, float *Y, int C, 
-                              int H_in, int W_in, int W_out, int K, int M);
+void ConvLayerForwardGPUnaive(float *FM_in, float *W, float *FM_out, 
+               int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out);
 __global__ 
-void convLayer_forward_GPU_tiled(float* FM_in, float* W, float* Y,
-		int C, int H_in, int W_in, int W_out, int K, int M);
+void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
+	       int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out);
 __global__ 
-void convLayer_backward_GPU_naive(float* FM_in, float* W, float* Y,
-		int C, int H_in, int W_in, int W_out, int K, int M);
+void ConvLayerBackwardGPUnaive(float *FM_in, float *W, float *FM_out,
+	       int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out);
 __global__ 
 void unroll_Kernel(int C, int H_in, int W_in, int K, float* FM_in, float* FM_Unroll);
 __global__ 
