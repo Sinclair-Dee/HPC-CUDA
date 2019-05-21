@@ -133,7 +133,7 @@ void ConvLayerForward(int BATCH, float *FM_in, int CH_in, int H_in, int W_in
 //
 
 __global__
-void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
+void ConvLayerForwardGPUnaive(float *FM_in, float  *W, float *FM_out,
                int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out){
   int H_out = H_in - W_h_w +1;
   int NumTile = ceilf((float)W_out/TILE_WIDTH);
@@ -142,7 +142,7 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
   batch = blockIdx.x;
   ch_out = blockIdx.y;
   h = (blockIdx.z / NumTile) * TILE_WIDTH + threadIdx.y; //h of H_out
-  w = (blockIdx.z / NumTile) * TILE_WIDTH + threadIdx.x; //w of W_out
+  w = (blockIdx.z % NumTile) * TILE_WIDTH + threadIdx.x; //w of W_out
   
   float ResAcc = 0;
   //allocate each outpt point to one thread
@@ -168,6 +168,63 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
 __global__
 void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
                int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out){
+
+  int batch, ch_out, h, w,h_base,w_base,h0,w0;
+  int FM_tile_width = TILE_WIDTH + W_h_w - 1;
+  int H_out = H_in - W_h_w + 1;
+  int NumTile = ceilf((float)W_out/TILE_WIDTH);
+  NumTile = NumTile == 0 ? 1 : NumTile;
+  
+  __shared__ float shmem[(TILE_WIDTH + CONV_KERNEL_SIZE -1)*
+                         (TILE_WIDTH + CONV_KERNEL_SIZE -1)+
+                         (CONV_KERNEL_SIZE * CONV_KERNEL_SIZE)]; //kernel size equal 5
+  float *FM_shared =(float*)&shmem[0]; //
+  float *W_shared = (float*)&shmem[FM_tile_width * FM_tile_with];
+  
+  batch = blockIdx.x;
+  ch_out = blockIdx.y
+
+  h_base = (blockIdx.z / NumTile)
+  w_base = (blockIdx.z % NumTile)
+
+  h0 = threadIdx.x;
+  w0 = threadIdx.y;
+
+  h = h_base * TILE_WIDTH + h0;
+  w = w_base * TILE_WIDTH + w0;
+
+  int ch_in, i, j;
+
+  float ResAcc = 0;
+  
+
+  for(ch_in = 0; ch_in < CH_in; ch_in++){
+    //LOAD weights for W[batch,ch_out..]
+    if((h0 < W_h_w) && (w0 < W_h_w)){
+      W_shared[h0 * (CONV_KERNEL) + w0] = W[ch_out*(CH_in*W_h_w*W_h_w) + ch_in*(W_h_w*W_h_w) + h0 * W_h_w + w0];
+    }
+    __syncthreads();
+    
+    for(int m = h; m < h_base * TILE_WIDTH + FM_tile_width; m += TILE_WIDTH){
+      for(int n = w; n < w_based * TILE_WIDTH + FM_tile_width; n += TILE_WIDTH){
+        if(m - h_base < FM_tile_width && (n-w_base) < FM_tile_width){
+          FM_shared[(m - h_base)*FM_tile_width +(n-w_base)] = 
+                             FM_in[batch * (CH_in * H_in * W_in) + ch_in * (H_in*W_in)+m*W_in + N]; 
+
+
+
+
+        }
+        }
+    }
+  }
+
+
+
+
+
+
+
   
 }
 

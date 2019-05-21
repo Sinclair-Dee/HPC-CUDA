@@ -33,7 +33,7 @@
 #define MINIBATCH 1000
 #define LEARNIG_RATE 2e-4
 #define LAMDA (3e-1)
-#define CONV_KERNEL_SIZE 5
+#define CONV_KERNEL_SIZE 5 // max conv kernel size
 #define LABEL_ONE 1
 #define LABEL_ZERO 0
 #define NUM_TRAIN 60000
