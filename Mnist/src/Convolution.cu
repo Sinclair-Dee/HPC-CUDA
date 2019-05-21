@@ -83,7 +83,31 @@ void Convlution::forward_GPU_tiled(){
 }
 
 void Convlution::forward_GPU_gemm(){
+  float* Output_pointer = thrust::raw_pointer_cast( device_FM_out.data() );
+  float* FM_in__pointer = thrust::raw_pointer_cast( device_FM_in.data() );
+  float* Unroll_FM_in_pointer = thrust::raw_pointer_cast( device_Unroll_FM.data() );
 
+  for(int i = 0; i< MiniBatch; i++){
+    int H_out = Inputimage_height - W_h_w + 1;
+    int W_out = Inputimage_width - W_h_w + 1;
+
+    float *batchFM_in_pointer = FM_in_pointer + i * (Inputimage_channel * Inputimage_height * Inputimage_width);
+    float *
+
+    int num_Thread = Inputimage_channel * Outputimage_height*Outputimage_width;
+    int num_Blocks = ceil((float)num_Thread/1024);
+
+    unroll_Kernel<<<num_blocks, 1024>>>(Inputimage_channel, Inputimage_height,Inputimage_width, W_width_height, 
+                                        FM_in_pointer, Unroll_FM_in_pointer);
+    
+    float *W_pointer = thust::raw_pointer_cast(device_W.data());
+
+
+    
+    
+
+  
+  }
 }
 
 void Convlution::backward_GPU_gemm(){
@@ -197,7 +221,6 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
 
   float ResAcc = 0;
   
-
   for(ch_in = 0; ch_in < CH_in; ch_in++){
     //LOAD weights for W[batch,ch_out..]
     if((h0 < W_h_w) && (w0 < W_h_w)){
@@ -228,6 +251,36 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
     }
   }
 }
+
+__global__
+void unroll_Kernel(int CH_in, int H_in, int W_in, int W_h_w, float *FM_in, float *Unroll_FM_in );
+ // this->device_FM_in.resize(Mini_Batch * Inputimage_channel * Inputimage_height * Inputimage_width, 0);
+ // this->device_Unroll_FM.resize((Inputimage_channel * W_width_height * W_width_height) * (Outputimage_width *Outputimage_height),0);
+
+ 
+  int 
+  int ThreadIdx = blockIdx.x * 1024 + threadIdx.x
+  int H_out = h_in - W_h_w + 1;
+  int W_out = w_in - W_h_w + 1;
+  int Unroll_H_W = H_out * W_out;
+  
+  if(ThreadIdx < CH_in * Unroll_H_W){
+
+    unroll_ch_in = ThreadIdx / Unroll_H_W;
+    unroll_fm = ThreadIdx % Unroll_H_W
+    h_out = unroll_fm / W_out;
+    w_out = unroll_fm % W_out;
+    unroll_ch_base = unroll_ch_in * W_h_w * W_h_w;
+
+    for(i = 0; i< W_h_w; i++){
+      for(j = 0; j < W_h_w; j++){
+        h_unroll = unroll_base + i * W_h_w + j;
+        if(unroll_ch_in < CH_in && (h_out + i < H_in) && (w_out + j) < W_out){
+          Unroll_FM_in[h_unroll * Unroll_H_W + unroll_fm ] = FM_in[ch_in*(W_in * H_in) + (h_out + i) * W_in + (w_out + j)];
+        }
+      }
+    }
+  }
 
 
 

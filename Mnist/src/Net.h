@@ -121,8 +121,8 @@ public:
   int W_width_height;
   int W_channel;
   int Inputimage_height;
+  int Inputimage_width;
   int Inputimage_channel;
-  int Inputimahe_channel;
   int FM_in_width;
   int FM_in_height;
   int Outputimage_width;
@@ -144,7 +144,7 @@ __global__
 void ConvLayerBackwardGPUnaive(float *FM_in, float *W, float *FM_out,
 	       int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out);
 __global__ 
-void unroll_Kernel(int C, int H_in, int W_in, int K, float* FM_in, float* FM_Unroll);
+void unroll_Kernel(int CH_in, int H_in, int W_in, int W_h_w, float *FM_in, float *Unroll_FM_in);
 __global__ 
 void col2im_Kernel(int C, int H_in, int W_in, int K, float* FM_in, float* FM_Unroll);
 
