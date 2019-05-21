@@ -187,8 +187,8 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
   h_base = (blockIdx.z / NumTile)
   w_base = (blockIdx.z % NumTile)
 
-  h0 = threadIdx.x;
-  w0 = threadIdx.y;
+  h0 = threadIdx.y;
+  w0 = threadIdx.x;
 
   h = h_base * TILE_WIDTH + h0;
   w = w_base * TILE_WIDTH + w0;
@@ -209,23 +209,24 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
       for(int n = w; n < w_based * TILE_WIDTH + FM_tile_width; n += TILE_WIDTH){
         if(m - h_base < FM_tile_width && (n-w_base) < FM_tile_width){
           FM_shared[(m - h_base)*FM_tile_width +(n-w_base)] = 
-                             FM_in[batch * (CH_in * H_in * W_in) + ch_in * (H_in*W_in)+m*W_in + N]; 
-
-
-
-
+                             FM_in[batch * (CH_in * H_in * W_in) + ch_in * (H_in*W_in)+m*W_in + n]; 
         }
+      }
+    }
+    __syncthreads();
+  
+    for(i = 0; i < W_h_w; i++){
+      for(j = 0; j < W_h_w; j++){
+        if(h < H_out && w < W_out){
+          ResAcc += FM_shared[(h0 + i)*X_tile_width + (w0 + j)] * W_shared[i * W_h_w + j];         
         }
+      }
+    }
+    __syncthreads();
+    if(h < H_out && w < W_out){
+      FM_out[batch *(CH_out*H_out*W_out)+ch_out*(H_out*W_out) + h * W_out + w] = ResAcc; 
     }
   }
-
-
-
-
-
-
-
-  
 }
 
 

@@ -37,7 +37,7 @@
 #define LABEL_ONE 1
 #define LABEL_ZERO 0
 #define NUM_TRAIN 60000
-#define NUM_TEST  10000
+#define NUM_TEST  1000 // max conv kernel size0
 #define RAW_DIM 28
 #define RAW_PIXELS_PER_IMG 784
 #define RAW_DIM_PADDING 32
