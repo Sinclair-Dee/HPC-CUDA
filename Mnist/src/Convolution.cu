@@ -91,9 +91,6 @@ void Convlution::forward_GPU_gemm(){
     int H_out = Inputimage_height - W_h_w + 1;
     int W_out = Inputimage_width - W_h_w + 1;
 
-    float *batchFM_in_pointer = FM_in_pointer + i * (Inputimage_channel * Inputimage_height * Inputimage_width);
-    float *
-
     int num_Thread = Inputimage_channel * Outputimage_height*Outputimage_width;
     int num_Blocks = ceil((float)num_Thread/1024);
 
@@ -102,9 +99,16 @@ void Convlution::forward_GPU_gemm(){
 
     float *W_pointer = thust::raw_pointer_cast(device_W.data());
 
+    dim3 threadsPerBlock(TILE_WIDTH,TILE_WIDTH)
+    dim3 numBlocks(ceil((float)Outputimage_width * Outputimage_height/TILE_WIDTH), ceil((float)Outputimage_width * Outputimage_height/TILE_WIDTH));
 
+    //void GEMM(float *W, float* Unroll_FM_in, float* FM_out, int M_height_in, int M_width_N_height_in, int N_width_in, int height_out, int width_out);
+    GEMM<<<numBlocks,threadsPerBlock>>>(W_pointer, Unroll_FM_in_pointer, Output_pointer,
+           Outputimage_channel,Inputimage_channel*W_width_height*W_width_height, Outputimage_width*Outputimage_height,
+           Outputimage_channel, Outputimage_width*Outputimage_height);
 
-
+    Output_pointer = Output_pointer+(Outputimage_channel*Outputimage_width*Outputimage_height);
+    FM_in__pointer = FM_in__pointer + (Inputimage_channel*Inputimage_height*Inputimage_width);
   }
 }
 

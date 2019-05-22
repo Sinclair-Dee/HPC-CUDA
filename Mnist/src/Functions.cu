@@ -28,21 +28,26 @@ void read_data(const char* datapath, host_vector< host_vector<float> >& data){
   int magic_number = 0;
   int number_of_images = 0;
   int n_rows = 0;
-  
+
   infile.read((char*)&magic_number,sizeof(magic_number));
   magic = reverse_int32(magic_number);
   cout<<"magic number: "<<magic_number << endl;
-  
+
   infile.read((char*)&number_of_images,sizeof(number_of_images));
   number_of_images = reverse_int32(number_of_images);
   cout<<"number of images: "<<number_of_images<<endl;
 }
 
+//GEMM<<<numBlocks,threadsPerBlock>>>(W_pointer, Unroll_FM_in_pointer, Output_pointer,
+//       Outputimage_channel,Inputimage_channel*W_width_height*W_width_height, Outputimage_width*Outputimage_height,
+//       Outputimage_channel, Outputimage_width*Outputimage_height);
 
+__global__
+void GEMM(float *W, float* Unroll_FM_in, float* FM_out, 
+          int M_height_in, int M_width_N_height_in, int N_width_in,
+          int height_out, int width_out){
 
-
-
-
+          }
 
 
 
