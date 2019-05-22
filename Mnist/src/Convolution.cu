@@ -5,7 +5,7 @@ namespace GPU_Scope{
 void Convolution::init(int minib, int Inputimage_h, int Inputimage_w, int Inputimage_ch, int W_w_h, int W_ch){
   std::default_random_engine generator;
   std::normal_distribution<float> distribution(0,0.1);
- 
+
   this->MiniBatch = minib;
 
   this->W_weight_height = W_w_h;
@@ -16,17 +16,17 @@ void Convolution::init(int minib, int Inputimage_h, int Inputimage_w, int Inputi
   this->Inputimage_channel = Inputimage_ch;
   this->FM_in__width = Inputimage_ch * Inputimage_w * Inputimage_h;
   this->FM_in__height = minib;
-  
+
   this->Outputimage_width=(Inputimage_width-W_width_height+1);
   this->Outputimage_height=(Inputimage_height-W_width_height+1);
   this->Outputimage_channel=W_channel/Inputimage_channel;
-  this->FM_out_weight = Outputimage_channel * Outputimage_height * Outputimage_width; 
+  this->FM_out_weight = Outputimage_channel * Outputimage_height * Outputimage_width;
   this->FM_out_height = minib;
 
   this->Unroll_FM_width  = Outputimage_width * Outputimage_height;
   this->Unroll_FM_height = Inputimage_channel * W_width_height * W_width_height;
 
-  //allocate memory 
+  //allocate memory
   this->device_FM_in.resize(Mini_Batch * Inputimage_channel * Inputimage_height * Inputimage_width, 0);
   this->host_FM_in.resize(Mini_Batch * Inputimage_channel * Inputimage_height * Inputimage_width, 0);
   this->device_Unroll_FM.resize((Inputimage_channel * W_width_height * W_width_height) * (Outputimage_width *Outputimage_height),0);
@@ -60,7 +60,7 @@ void Convlution::forward_CPU_naive(){
   float *input_pointer = thrust::raw_pointer_cast(device_FM_in.data());
   float *W_pointer = thrust::raw_pointer_cast(device_W.data());
   float *Output_pointer = thrust::raw_pointer_cast(device_FM_out.data());
-  
+
   ConvLayerForwardGPUnaive<<<numBlocks, threadsPerBlock>>>(input_pointer, W_pointer, Output_pointer,
                                   Inputimage_channel, Inputimage_height, Inputimage_width , Outputimage_width, W_width_height, Outputimage_channel);
 
@@ -72,11 +72,11 @@ void Convlution::forward_GPU_tiled(){
   int bz = ceil((float)Outputimage_width / TILE_WIDTH) * ceil((float)Outputimage_height / TILE_height);
   bz = bz == 0 ? 1 :bz;
   dim3 numBlocks(MiniBatch, Outputimage_channel, bz);
-  
-  float *input_pointer = thrust::raw_pointer_cast(device_FM_in.data()); 
+
+  float *input_pointer = thrust::raw_pointer_cast(device_FM_in.data());
   float *W_pointer = thrust::raw_pointer_cast(device_W.data());
   float *Output_point = thrust::raw_pointer_cast(device_FM_out.data());
-  
+
   ConvLayerForwardGPUtiled<<<mumBlocks, threadsPerBlock>>>(input_pointer, W_pointer, Output_pointer,
 			Inputimage_channel, Inputimage_height, Inputimage_width , Outputimage_width, W_width_height, Outputimage_channel);
 
@@ -97,16 +97,14 @@ void Convlution::forward_GPU_gemm(){
     int num_Thread = Inputimage_channel * Outputimage_height*Outputimage_width;
     int num_Blocks = ceil((float)num_Thread/1024);
 
-    unroll_Kernel<<<num_blocks, 1024>>>(Inputimage_channel, Inputimage_height,Inputimage_width, W_width_height, 
+    unroll_Kernel<<<num_blocks, 1024>>>(Inputimage_channel, Inputimage_height,Inputimage_width, W_width_height,
                                         FM_in_pointer, Unroll_FM_in_pointer);
-    
+
     float *W_pointer = thust::raw_pointer_cast(device_W.data());
 
 
-    
-    
 
-  
+
   }
 }
 
@@ -126,7 +124,7 @@ void Convolution::convLayer_forward(){
 //FM_in：input feature maps
 //W： convolution filters
 //FM_out：output feature maps
-//void Convolution::ConvLayerForward(int BATCH, host_vector<float>& FM_in,  int CH_in, int H_in, int W_in, 
+//void Convolution::ConvLayerForward(int BATCH, host_vector<float>& FM_in,  int CH_in, int H_in, int W_in,
 //                                   host_vector<float>& W, int W_h_w,  host_vector<float>& FM_out, int CH_out)
 void ConvLayerForward(int BATCH, float *FM_in, int CH_in, int H_in, int W_in
                         float *W, int W_h_w, float *FM_out, int CH_out){
@@ -141,9 +139,9 @@ void ConvLayerForward(int BATCH, float *FM_in, int CH_in, int H_in, int W_in
           for(int ch_in = 0; ch_in < CH_in; ch_in){
             for(int i = 0; i < W_h_w; i++){//h of filter
               for(int j = 0; j < W_h_w; j++){//w of filter
-                FM_out[batch*(CH_out * H_out * W_out)+ch_out * (H_out * W_out) + h * W_out + w] += 
-                         FM_in[batch*(CH_in*H_in*W_in) + ch_in*(H_in*W_in)+(h+i)*W_h_w + (w+j)] * 
-                         W[ch_out*(CH_in*W_h_w*W_h_w) + ch_in*(W_h_w*W_h_w)+i*W_h_w + j]; 
+                FM_out[batch*(CH_out * H_out * W_out)+ch_out * (H_out * W_out) + h * W_out + w] +=
+                         FM_in[batch*(CH_in*H_in*W_in) + ch_in*(H_in*W_in)+(h+i)*W_h_w + (w+j)] *
+                         W[ch_out*(CH_in*W_h_w*W_h_w) + ch_in*(W_h_w*W_h_w)+i*W_h_w + j];
               }
             }
           }
@@ -167,7 +165,7 @@ void ConvLayerForwardGPUnaive(float *FM_in, float  *W, float *FM_out,
   ch_out = blockIdx.y;
   h = (blockIdx.z / NumTile) * TILE_WIDTH + threadIdx.y; //h of H_out
   w = (blockIdx.z % NumTile) * TILE_WIDTH + threadIdx.x; //w of W_out
-  
+
   float ResAcc = 0;
   //allocate each outpt point to one thread
   for(ch_in = 0; ch_in < CH_in; ch_in++){
@@ -198,13 +196,13 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
   int H_out = H_in - W_h_w + 1;
   int NumTile = ceilf((float)W_out/TILE_WIDTH);
   NumTile = NumTile == 0 ? 1 : NumTile;
-  
+
   __shared__ float shmem[(TILE_WIDTH + CONV_KERNEL_SIZE -1)*
                          (TILE_WIDTH + CONV_KERNEL_SIZE -1)+
                          (CONV_KERNEL_SIZE * CONV_KERNEL_SIZE)]; //kernel size equal 5
   float *FM_shared =(float*)&shmem[0]; //
   float *W_shared = (float*)&shmem[FM_tile_width * FM_tile_with];
-  
+
   batch = blockIdx.x;
   ch_out = blockIdx.y
 
@@ -220,34 +218,34 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
   int ch_in, i, j;
 
   float ResAcc = 0;
-  
+
   for(ch_in = 0; ch_in < CH_in; ch_in++){
     //LOAD weights for W[batch,ch_out..]
     if((h0 < W_h_w) && (w0 < W_h_w)){
       W_shared[h0 * (CONV_KERNEL) + w0] = W[ch_out*(CH_in*W_h_w*W_h_w) + ch_in*(W_h_w*W_h_w) + h0 * W_h_w + w0];
     }
     __syncthreads();
-    
+
     for(int m = h; m < h_base * TILE_WIDTH + FM_tile_width; m += TILE_WIDTH){
       for(int n = w; n < w_based * TILE_WIDTH + FM_tile_width; n += TILE_WIDTH){
         if(m - h_base < FM_tile_width && (n-w_base) < FM_tile_width){
-          FM_shared[(m - h_base)*FM_tile_width +(n-w_base)] = 
-                             FM_in[batch * (CH_in * H_in * W_in) + ch_in * (H_in*W_in)+m*W_in + n]; 
+          FM_shared[(m - h_base)*FM_tile_width +(n-w_base)] =
+                             FM_in[batch * (CH_in * H_in * W_in) + ch_in * (H_in*W_in)+m*W_in + n];
         }
       }
     }
     __syncthreads();
-  
+
     for(i = 0; i < W_h_w; i++){
       for(j = 0; j < W_h_w; j++){
         if(h < H_out && w < W_out){
-          ResAcc += FM_shared[(h0 + i)*X_tile_width + (w0 + j)] * W_shared[i * W_h_w + j];         
+          ResAcc += FM_shared[(h0 + i)*X_tile_width + (w0 + j)] * W_shared[i * W_h_w + j];
         }
       }
     }
     __syncthreads();
     if(h < H_out && w < W_out){
-      FM_out[batch *(CH_out*H_out*W_out)+ch_out*(H_out*W_out) + h * W_out + w] = ResAcc; 
+      FM_out[batch *(CH_out*H_out*W_out)+ch_out*(H_out*W_out) + h * W_out + w] = ResAcc;
     }
   }
 }
@@ -257,13 +255,13 @@ void unroll_Kernel(int CH_in, int H_in, int W_in, int W_h_w, float *FM_in, float
  // this->device_FM_in.resize(Mini_Batch * Inputimage_channel * Inputimage_height * Inputimage_width, 0);
  // this->device_Unroll_FM.resize((Inputimage_channel * W_width_height * W_width_height) * (Outputimage_width *Outputimage_height),0);
 
- 
-  int 
+
+  int
   int ThreadIdx = blockIdx.x * 1024 + threadIdx.x
   int H_out = h_in - W_h_w + 1;
   int W_out = w_in - W_h_w + 1;
   int Unroll_H_W = H_out * W_out;
-  
+
   if(ThreadIdx < CH_in * Unroll_H_W){
 
     unroll_ch_in = ThreadIdx / Unroll_H_W;
