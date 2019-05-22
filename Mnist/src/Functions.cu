@@ -14,7 +14,6 @@ int reverse_int32(int i){
   return ((int)byte1<<24) + ((int)byte2<<16) + ((int) byte3<<8) + (int)byte4;
 }
 namespace GPU_Scope{
-
 //read [number of image]×28×28 MNIST data from {datapath}
 //store data into the given float array
 void read_data(const char* datapath, host_vector< host_vector<float> >& data){
@@ -38,49 +37,41 @@ void read_data(const char* datapath, host_vector< host_vector<float> >& data){
   cout<<"number of images: "<<number_of_images<<endl;
 }
 
-//GEMM<<<numBlocks,threadsPerBlock>>>(W_pointer, Unroll_FM_in_pointer, Output_pointer,
-//       Outputimage_channel,Inputimage_channel*W_width_height*W_width_height, Outputimage_width*Outputimage_height,
-//       Outputimage_channel, Outputimage_width*Outputimage_height);
 
 __global__
-void GEMM(float *W, float* Unroll_FM_in, float* FM_out, 
+void GEMM(float *W, float* Unroll_FM_in, float* FM_out,
           int M_height_in, int M_width_N_height_in, int N_width_in,
           int height_out, int width_out){
+  __shared__ float shmemM[TILE_WIDTH][TILE_WIDTH];
+  __shared__ float shmemN[TILE_WIDTH][TILE_WIDTH];
+  int threadidx = threadIdx.x;
+  int threadidy = threadIdx.y;
+  int blockidx  = blockIdx.x;
+  int blockidy  = blockIdx.y;
+  int row = blockidy * TILE_WIDTH + threadidy;
+  int col = blockidx * TILE_WIDTH + threadIdx;
 
-          }
+  float Pvalue = 0;
+  for(int m = 0; m < M_width_N_height_in; m++){
+    if(row < M_height_in && (m * TILE_WIDTH + threadidx) < M_width_N_height_in)
+      shmemM[threadidy][threadidx] = Unroll_FM_in[row * M_width_N_height_in + (m*TILE_WIDTH) + threadIdx];
+    else
+      shmemM[threadidy][threadidx] = 0;
+    if((m*TILE_WIDTH + threadidy) < M_width_N_height_in && col < N_width_in)
+      shmemN[threadidy][threadidx] = W[(m*TILE_WIDTH + threadidy) * M_width_N_height_in +col];
+    else
+      shmemN[threadidy][threadidx] = 0;
+    __syncthreads();
 
+    for(int k = 0; k < TILE_WIDTH; k++){
+      Pvalue + shmemM[threadidy][k] * shmemN[k][threadidx];
+    }
+    __syncthreads();
+  }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  if(row < height_out && col < width_out){
+      FM_out[row * width_out + col] = Pvalue;
+  }
+}
 
 }

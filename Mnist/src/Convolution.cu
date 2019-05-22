@@ -100,7 +100,7 @@ void Convlution::forward_GPU_gemm(){
     float *W_pointer = thust::raw_pointer_cast(device_W.data());
 
     dim3 threadsPerBlock(TILE_WIDTH,TILE_WIDTH)
-    dim3 numBlocks(ceil((float)Outputimage_width * Outputimage_height/TILE_WIDTH), ceil((float)Outputimage_width * Outputimage_height/TILE_WIDTH));
+    dim3 numBlocks(ceil((float)Outputimage_width * Outputimage_height/TILE_WIDTH), ceil((float)Outputimage_channel/TILE_WIDTH));
 
     //void GEMM(float *W, float* Unroll_FM_in, float* FM_out, int M_height_in, int M_width_N_height_in, int N_width_in, int height_out, int width_out);
     GEMM<<<numBlocks,threadsPerBlock>>>(W_pointer, Unroll_FM_in_pointer, Output_pointer,
@@ -113,10 +113,6 @@ void Convlution::forward_GPU_gemm(){
 }
 
 void Convlution::backward_GPU_gemm(){
-
-}
-
-void Convolution::convLayer_forward(){
 
 }
 
@@ -154,9 +150,6 @@ void ConvLayerForward(int BATCH, float *FM_in, int CH_in, int H_in, int W_in
     }
   }
 }
-
-
-//
 
 __global__
 void ConvLayerForwardGPUnaive(float *FM_in, float  *W, float *FM_out,
@@ -255,12 +248,11 @@ void ConvLayerForwardGPUtiled(float *FM_in, float  *W, float *FM_out,
 }
 
 __global__
-void unroll_Kernel(int CH_in, int H_in, int W_in, int W_h_w, float *FM_in, float *Unroll_FM_in );
+void unroll_Kernel(int CH_in, int H_in, int W_in, int W_h_w, float *FM_in, float *Unroll_FM_in ){
  // this->device_FM_in.resize(Mini_Batch * Inputimage_channel * Inputimage_height * Inputimage_width, 0);
  // this->device_Unroll_FM.resize((Inputimage_channel * W_width_height * W_width_height) * (Outputimage_width *Outputimage_height),0);
 
-
-  int
+  int unroll_ch_in, unroll_fm, h_out, w_out, unroll_ch_base, i, j;
   int ThreadIdx = blockIdx.x * 1024 + threadIdx.x
   int H_out = h_in - W_h_w + 1;
   int W_out = w_in - W_h_w + 1;
@@ -286,4 +278,9 @@ void unroll_Kernel(int CH_in, int H_in, int W_in, int W_h_w, float *FM_in, float
 
 
 
+}
+
+}
+
+namespace FPGA_HLS_Scope{//to do 
 }

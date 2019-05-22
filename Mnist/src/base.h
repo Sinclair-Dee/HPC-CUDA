@@ -44,19 +44,19 @@
 #define RAW_PIXEL_PER_IMG_PADDING 1024
 #define MNIST_SCALE_FACTOR 0.00390625
 #define MAXBYTE 255
-
 #define gpuError(ans) { gpuAssert((ans),__FILE__, __LINE__);}
-inline void gpuAssert(cudaError_t ans, const char *file, int line, bool abort = true){
-  if(ans != cudaSuccess){
-    fprintf(stderr,"GPU_Assert:%s%s%d\n", cudaGetErrorString(ans), file, line);
-    if(abort) exit(ans);
+inline void gpuAssert(cudaError_t Err, sonst char *file, int *line,bool abort = true){
+  if(Err != cudaSuccess){
+    fprintf(stderr,"GPUassert:%s %s %d\n",cudaGetErrorString(Err),file,line);
+    if(abort) exit(code);
   }
 }
 
 namespace GPU_Scope{
 
 void ClearScreen();
-void printMNIST_H_W_row_col_for_Main(thrust::device_vector<float> &DATA_, int Height, int Width, int row_start_index, int col_start_index, int row_num, int col_num, int row_interval, int col_interval, char* str);
+void printMNIST_H_W_row_col_for_Main(thrust::device_vector<float> &DATA_, int Height, int Width, int row_start_index, int col_start_index,
+                                     int row_num, int col_num, int row_interval, int col_interval, char* str);
 
 /***** Function declarations *****************************/
 void printMNIST(thrust::host_vector<float>& data);
@@ -67,12 +67,8 @@ void read_label(const char* datapath, thrust::host_vector<thrust::host_vector<fl
 /***** Function declarations end *************************/
 
 /***** CUDA Kernel declarations *****************************/
-inline void gpuAssert(cudaError_t Err, sonst char *file, int *line,bool abort = true){
-  if(Err != cudaSuccess){
-    fprintf(stderr,"GPUassert:%s %s %d\n",cudaGetErrorString(Err),file,line);
-    if(abort) exit(code);
-  }
-}
+
+
 __global__
 void ConvLayerForwardGPUnaive(float *FM_in, float *W, float *FM_out,
                int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out);
@@ -87,7 +83,8 @@ void unroll_Kernel(int CH_in, int H_in, int W_in, int W_h_w, float *FM_in, float
 __global__
 void col2im_Kernel(int C, int H_in, int W_in, int K, float* FM_in, float* FM_Unroll);
 __global__
-void GEMM(float *W, float* Unroll_FM_in, float* FM_out, int M_height_in, int M_width_N_height_in, int N_width_in, int height_out, int width_out);
+void GEMM(float *W, float* Unroll_FM_in, float* FM_out,
+          int M_height_in, int M_width_N_height_in, int N_width_in, int height_out, int width_out);
 
 /***** CUDA Kernel declarations end ******************************/
 
