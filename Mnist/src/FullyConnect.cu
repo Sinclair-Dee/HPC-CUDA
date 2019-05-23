@@ -2,6 +2,7 @@
 
 namespace GPU_Scope{
 void FullyConnect::init( int minib, int Inputimage_w_W_h, int W_w){
+  //FM_in -> minibatch*sequance_data
   //(minib, Inputimage_w_W_h) × (Inputimage_w_W_h, W_w) = (minib, W_w)
   std::default_random_engine generator;
   std::normal_distribution<float> distribution(0,0.1);
@@ -49,9 +50,10 @@ void FullyConnect::forward(){
                  FM_in_height, FM_in_width, W_width, Fm_out_height, FM_out_width);
 }
 
-void FullyConnect::backward()
+void FullyConnect::backward(){}
 
 void FullyConnect::forward_gpu_test(thrust::device_vector<float> &input, int test_number);
+
 void FullyConnect::backward();
 
 }

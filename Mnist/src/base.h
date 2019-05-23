@@ -69,7 +69,6 @@ void ConvLayerForward(int batch, float *FM_in, int CH_in, int H_in, int W_in
 
 /***** CUDA Kernel declarations *****************************/
 
-
 __global__
 void ConvLayerForwardGPUnaive(float *FM_in, float *W, float *FM_out,
           int CH_in, int H_in, int W_in, int W_out, int W_h_w, int CH_out);
@@ -193,7 +192,40 @@ public:
 
 }
 
-class Pool {
+class Pool {//// M*C*H*W
+public:
+  void init();
+  void polligLayer_forward();
+
+
+
+
+
+  int MiniBatch;
+  int FM_in_width;
+  int FM_in_height;
+  
+
+  int pool_size;
+  int W_width;
+  int W_height;
+  int W_width_height;
+  int W_channel;
+
+  int Unroll_FM_in_width;
+  int Unroll_FM_in_height;
+  int Inputimage_height;
+  int Inputimage_width;
+  int Inputimage_channel;
+  int FM_out_width;
+  int Fm_out_height;
+  int Outputimage_width;
+  int Outputimage_height;
+  int Outputimage_channel;
+
+
+
+
 
 }
 
