@@ -7,23 +7,23 @@ class Net{
 
 }
 
-class Net_CPU: public Net{
+class Net_CPU::public Net{
 
 }
 
-class Net_GPU_Naive: public Net{
+class Net_GPU_Naive::public Net{
 
 }
 
-class Net_GPU_Tiled: public Net{
+class Net_GPU_Tiled::public Net{
 
 }
 
-class Net_GPU_Gemm: public Net{
+class Net_GPU_Gemm::public Net{
 
 }
 
-class Net_GPU_test: public Net{
+class Net_GPU_test::public Net{
 
 }
 
