@@ -194,39 +194,30 @@ public:
 
 class Pool {//// M*C*H*W
 public:
-  void init();
+  void init(int minib, int Inputimage_h, Inputimage_w, Inputimage_ch, int pool_size);
   void polligLayer_forward();
 
 
 
 
 
+
   int MiniBatch;
+  int pool_size;
   int FM_in_width;
   int FM_in_height;
-  
-
-  int pool_size;
+  int Inputimage_height;
+  int Inputimage_width;
+  int Inputimage_channel;
   int W_width;
   int W_height;
   int W_width_height;
   int W_channel;
-
-  int Unroll_FM_in_width;
-  int Unroll_FM_in_height;
-  int Inputimage_height;
-  int Inputimage_width;
-  int Inputimage_channel;
   int FM_out_width;
-  int Fm_out_height;
+  int FM_out_height;
   int Outputimage_width;
   int Outputimage_height;
   int Outputimage_channel;
-
-
-
-
-
 }
 
 class Softmax {
