@@ -37,7 +37,13 @@ void Pool::forward_CPU(){
 
 void Pool::forward_GPU_naive(){
 	dim3 threadsPerBlock(TILE_WIDTH, TILE_WIDTH);
-	int bz = ceil(static_cast<float>())
+	int bz = ceil((float)Outputimage_width/TILE_WIDTH)*ceil((float)Outputimage_height/TILE_WIDTH);
+	if (0 == bz) bz = 1;
+	dim3 numBlocks(MiniBatch, Outputimage_channel, bz);
+	float *input_pointer = thrust::raw_pointer_cast(device_FM_in.data());
+	float *Output_pointer = thrust::raw_pointer_cast(device_FM_out.data());
+	poolingLayerForwardGPUtiled<<<numBlocks,threadsPerBlock>>>(input_pointer, Inputimage_height,
+			Inputimage_width, Output_pointer, Outputimage_channel, pool_size);
 }
 
 
