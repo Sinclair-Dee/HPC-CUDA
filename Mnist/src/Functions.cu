@@ -74,6 +74,33 @@ void ConvLayerForward(int batch, float *FM_in, int CH_in, int H_in, int W_in
   }
 }
 
+void poolingLayer_forward(int minib, float* FM_in, int H_in, int W_in, float* FM_out, int CH_in_out){
+  //CH_in_out:number of input/output feature maps
+  //H_in：height of each input image
+  //W_in：width of each input map image
+  //FM_in：input feature maps
+  //FM_out：output feature maps
+  
+  int H_out = H_in / pool_size;
+  int W_out = W_in / pool_size;
+  for(int batch = 0; batch < minib ; batch++){//for each sample in the mini-batch
+    for(int ch_out = 0; ch_out < CH_out; ch_out++){// for each output feature map
+      for(int h = 0; h < H_out; h++){   // for each output element
+        for(int w = 0; w < W_out; w++){ //of H_out * W_out size outputimage
+          FM_out[batch*(CH_out * H_out * W_out)+ch_out * (H_out * W_out) + h * W_out + w] = 0;
+          for(int i = 0; i < pool_size; i++){
+            for(int j = 0; j < pool_size; j++){
+                FM_out[batch*(CH_out * H_out * W_out)+ch_out * (H_out * W_out) + h * W_out + w] +=
+                         FM_in[batch*(CH_in*H_in*W_in) + ch_in*(H_in*W_in)+(pool_size * h+i)*W_in + (pool_size*w+j)] / (pool_size * pool_size);
+            }
+          }
+        }
+      }
+    }
+  }
+
+}
+
 __global__
 void GEMM(float *MatrixM, float* MatrixN, float* MatrixOut,
           int M_height_in, int M_width_N_height_in, int N_width_in,
