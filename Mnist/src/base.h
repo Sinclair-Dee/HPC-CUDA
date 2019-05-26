@@ -65,6 +65,7 @@ void read_data_no_padding(const char* datapath, thrust::host_vector<thrust::host
 void read_label(const char* datapath, thrust::host_vector<thrust::host_vector<float> &data>);
 void ConvLayerForward(int batch, float *FM_in, int CH_in, int H_in, int W_in
                       float *W, int W_h_w, float *FM_out, int CH_out);
+void poolingLayer_forward(int minib, float* FM_in, int H_in, int W_in, float* FM_out, int CH_out);
 /***** Function declarations end *************************/
 
 /***** CUDA Kernel declarations *****************************/
@@ -195,13 +196,20 @@ public:
 class Pool {//// M*C*H*W
 public:
   void init(int minib, int Inputimage_h, Inputimage_w, Inputimage_ch, int pool_size);
-  void polligLayer_forward();
-
-
-
-
-
-
+  void forward_CPU();
+  void forward_GPU_naive(); 
+  void forward_GPU_tiled();
+  void backward_GPU();
+  
+  
+  thrust::host_vector<float> host_FM_in;
+  thrust::host_vector<float> host_FM_out;
+  thrust::host_vector<float> host_Bias;
+  
+  thrust::device_vector<float> device_FM_in;
+  thrust::device_vector<float> device_FM_out;
+  thrust::device_vector<float> device_Bias;  
+  
   int MiniBatch;
   int pool_size;
   int FM_in_width;
@@ -218,6 +226,8 @@ public:
   int Outputimage_width;
   int Outputimage_height;
   int Outputimage_channel;
+  int Bias_height;
+  int Bias_width;
 }
 
 class Softmax {
