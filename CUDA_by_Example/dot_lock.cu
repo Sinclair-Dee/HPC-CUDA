@@ -8,7 +8,7 @@
 
 #define imin(a,b) (a < b ? a : b)
 
-const int N = 32 * 1024 * 1024;
+const int N = 4 * 1024 * 1024;
 const int threadsPerBlock = 256;
 const int blocksPerGrid =
             imin( 32, (N+threadsPerBlock-1) / threadsPerBlock );
@@ -59,7 +59,7 @@ int main( void ) {
     // allocate memory on the cpu side
     a = (float*)malloc( N*sizeof(float) );
     b = (float*)malloc( N*sizeof(float) );
-    c = (float*)malloc(sizeof(float));
+    c = (float*)malloc(   sizeof(float) );
     *c = 0;
 
     // allocate the memory on the GPU
