@@ -67,7 +67,7 @@ void float_to_color(unsigned char *optr,
                     const float *outSrc) {
     int threadidx = threadIdx.x + blockIdx.x * blockDim.x;
     int threadidy = threadIdx.y + blockIdx.y * blockDim.y;
-    int offset = threadidx + thready * blockDim.x * gridDim.x;
+    int offset = threadidx + threadidy * blockDim.x * gridDim.x;
 
     float l = outSrc[offset];
     float s = 1;

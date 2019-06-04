@@ -2,13 +2,14 @@
 #define __IMAGE__
 
 #include <iostream>
+#include <string>
 
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
 using namespace std;
-using namespace std;
+using namespace cv;
 
 class IMAGE
 {
@@ -18,7 +19,7 @@ public:
     IMAGE( int w, int h) 
     {
         image = Mat::zeros(w,h,CV_8UC4);
-        imshow("images",image);
+        //imshow("images",image);
     }
 
     unsigned char* get_ptr( void ) const   
@@ -34,6 +35,10 @@ public:
     char show_image(int time=0)
     {
         imshow("images",image);
+        return waitKey(time);
+    }
+    char save_image(string imagename, int time = 0){
+        imwrite(imagename,image);
         return waitKey(time);
     }
 };
