@@ -8,13 +8,14 @@
 
 #define imin(a,b) (a < b ? a : b)
 
-const int N = 33 * 1024 * 1024;
+const int N = 32 * 1024 * 1024;
 const int threadsPerBlock = 256;
 const int blocksPerGrid =
             imin( 32, (N+threadsPerBlock-1) / threadsPerBlock );
 
-__global__ void dot( Lock lock, float *a,
-                     float *b, float *c ) {
+__global__ 
+void dot( Lock lock, float *a,
+          float *b, float *c ) {
 
     __shared__ float cache[threadsPerBlock];
     int tid = threadIdx.x + blockIdx.x * blockDim.x;
@@ -54,11 +55,12 @@ __global__ void dot( Lock lock, float *a,
 int main( void ) {
     float   *a, *b, *c;
     float   *dev_a, *dev_b, *dev_c;
-    (*c) = 0;
 
     // allocate memory on the cpu side
     a = (float*)malloc( N*sizeof(float) );
     b = (float*)malloc( N*sizeof(float) );
+    c = (float*)malloc(sizeof(float));
+    *c = 0;
 
     // allocate the memory on the GPU
     HANDLE_ERROR( cudaMalloc( (void**)&dev_a,
@@ -67,6 +69,7 @@ int main( void ) {
                               N*sizeof(float) ) );
     HANDLE_ERROR( cudaMalloc( (void**)&dev_c,
                               sizeof(float) ) );
+
 
     // fill in the host memory with data
     for (int i=0; i<N; i++) {
@@ -80,9 +83,9 @@ int main( void ) {
     HANDLE_ERROR( cudaMemcpy( dev_b, b, N*sizeof(float),
                               cudaMemcpyHostToDevice ) ); 
     HANDLE_ERROR( cudaMemcpy( dev_c, c, sizeof(float),
-                              cudaMemcpyHostToDevice ) ); 
+                              cudaMemcpyHostToDevice ) );
 
-    Lock    lock;
+    Lock lock;
     dot<<<blocksPerGrid,threadsPerBlock>>>( lock, dev_a,
                                             dev_b, dev_c );
 
