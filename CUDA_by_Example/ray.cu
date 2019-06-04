@@ -3,7 +3,7 @@
 #include "./common/book.h"
 #include "./common/image.h"
 
-#define DIM 1024
+#define DIM 4096
 
 #define rnd( x ) (x * rand() / RAND_MAX)
 #define INF     2e10f
@@ -109,6 +109,6 @@ int main( void ) {
     HANDLE_ERROR( cudaFree( dev_bitmap ) );
 
     // display
-    bitmap.save_image("ray.png");
+    bitmap.save_image("ray.jpg");
 }
 
