@@ -1,7 +1,7 @@
 #include "./common/book.h"
 #include "./common/image.h"
 
-#define DIM 1000
+#define DIM 1024
 
 struct cuComplex {
     float   r;
