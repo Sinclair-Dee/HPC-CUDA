@@ -1,12 +1,11 @@
-
 #include "cuda.h"
 #include "./common/book.h"
 #include "./common/image.h"
 
 #define DIM 1024
 
-#define rnd( x ) (x * rand() / RAND_MAX)
-#define INF     2e10f
+#define rnd( x ) ( x * rand() / RAND_MAX)
+#define INF 2e10f
 #define SPHERES 20
 
 struct Sphere {
@@ -24,10 +23,8 @@ struct Sphere {
         return -INF;
     }
 };
-//对常量内存的单次读操作可以广播到其他的“邻近(nearby)”线程。
-__constant__ Sphere s[SPHERES];
 
-__global__ void kernel( unsigned char *ptr ) {
+__global__ void kernel( Sphere *s, unsigned char *ptr ) {
     // map from threadIdx/BlockIdx to pixel position
     int x = threadIdx.x + blockIdx.x * blockDim.x;
     int y = threadIdx.y + blockIdx.y * blockDim.y;
@@ -55,22 +52,26 @@ __global__ void kernel( unsigned char *ptr ) {
     ptr[offset*4 + 3] = 255;
 }
 
-int main( void ) {
-
-    // capture the start time
+int main(void) {
+    
     cudaEvent_t     start, stop;
     HANDLE_ERROR( cudaEventCreate( &start ) );
     HANDLE_ERROR( cudaEventCreate( &stop ) );
     HANDLE_ERROR( cudaEventRecord( start, 0 ) );
 
     IMAGE bitmap( DIM, DIM );
-    unsigned char   *dev_bitmap;
+    unsigned char *dev_bitmap;
+    Sphere *s;
 
     // allocate memory on the GPU for the output bitmap
     HANDLE_ERROR( cudaMalloc( (void**)&dev_bitmap,
                               bitmap.image_size() ) );
+    // allocate memory for the Sphere dataset
+    HANDLE_ERROR( cudaMalloc( (void**)&s,
+                              sizeof(Sphere) * SPHERES ) );
 
-    // allocate temp memory, initialize it, copy to constant
+
+    // allocate temp memory, initialize it, copy to
     // memory on the GPU, then free our temp memory
     Sphere *host_s = (Sphere*)malloc( sizeof(Sphere) * SPHERES );
     for (int i=0; i<SPHERES; i++) {
@@ -82,13 +83,15 @@ int main( void ) {
         host_s[i].z = rnd( 1000.0f ) - 500;
         host_s[i].radius = rnd( 100.0f ) + 20;
     }
-    HANDLE_ERROR( cudaMemcpyToSymbol(s, host_s, sizeof(Sphere) * SPHERES) );
+    HANDLE_ERROR( cudaMemcpy( s, host_s,
+                                sizeof(Sphere) * SPHERES,
+                                cudaMemcpyHostToDevice ) );
     free( host_s );
 
     // generate a bitmap from our sphere data
     dim3    grids(DIM/16,DIM/16);
     dim3    threads(16,16);
-    kernel<<<grids,threads>>>( dev_bitmap );
+    kernel<<<grids,threads>>>( s, dev_bitmap );
 
     // copy our bitmap back from the GPU for display
     HANDLE_ERROR( cudaMemcpy( bitmap.get_ptr(), dev_bitmap,
@@ -107,8 +110,8 @@ int main( void ) {
     HANDLE_ERROR( cudaEventDestroy( stop ) );
 
     HANDLE_ERROR( cudaFree( dev_bitmap ) );
+    HANDLE_ERROR( cudaFree( s ) );
 
     // display
-    bitmap.save_image("ray.png");
+    bitmap.save_image("ray_noconst.png");
 }
-
