@@ -2,7 +2,7 @@
 #include "./common/book.h"
 #include "./common/image.h"
 
-#define DIM 4096
+#define DIM 1024
 
 #define rnd( x ) (x * rand() / RAND_MAX)
 #define INF     2e10f
