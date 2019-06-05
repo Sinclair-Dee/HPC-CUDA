@@ -8,7 +8,7 @@
 
 #define imin(a,b) (a < b ? a : b)
 
-const int N = 4 * 1024 * 1024;
+const int N = 32 * 1024 * 1024;
 const int threadsPerBlock = 256;
 const int blocksPerGrid =
             imin( 32, (N+threadsPerBlock-1) / threadsPerBlock );
@@ -60,7 +60,6 @@ int main( void ) {
     a = (float*)malloc( N*sizeof(float) );
     b = (float*)malloc( N*sizeof(float) );
     c = (float*)malloc(   sizeof(float) );
-    *c = 0;
 
     // allocate the memory on the GPU
     HANDLE_ERROR( cudaMalloc( (void**)&dev_a,
@@ -72,7 +71,7 @@ int main( void ) {
 
 
     // fill in the host memory with data
-    for (int i=0; i<N; i++) {
+    for (int i = 0; i < N; i++) {
         a[i] = i;
         b[i] = i*2;
     }
@@ -82,8 +81,6 @@ int main( void ) {
                               cudaMemcpyHostToDevice ) );
     HANDLE_ERROR( cudaMemcpy( dev_b, b, N*sizeof(float),
                               cudaMemcpyHostToDevice ) ); 
-    HANDLE_ERROR( cudaMemcpy( dev_c, c, sizeof(float),
-                              cudaMemcpyHostToDevice ) );
 
     Lock lock;
     dot<<<blocksPerGrid,threadsPerBlock>>>( lock, dev_a,
@@ -96,7 +93,7 @@ int main( void ) {
 
     #define sum_squares(x)  (x*(x+1)*(2*x+1)/6)
 
-    printf( "Does GPU value %.6g = %.6g?\n", c,
+    printf( "Does GPU value %.6g = %.6g?\n", *c,
              2 * sum_squares( (float)(N - 1) ) );
 
     // free memory on the gpu side
