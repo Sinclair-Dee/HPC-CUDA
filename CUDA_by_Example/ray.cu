@@ -108,7 +108,7 @@ int main( void ) {
     HANDLE_ERROR( cudaFree( dev_bitmap ) );
 
     // display
-    bitmap.save_image("ray.jpg");
+    bitmap.save_image("ray.png");
 }
 
 
